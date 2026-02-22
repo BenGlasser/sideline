@@ -12,7 +12,7 @@ function getGroupForCategory(cat) { return CATEGORIES.find((g) => g.items.includ
 function loadJSON(key, fallback) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch { return fallback; } }
 function saveJSON(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} }
 
-const defaultPlayers = () => ["Player 1","Player 2","Player 3","Player 4","Player 5","Player 6","Player 7","Player 8","Player 9","Player 10"];
+const defaultPlayers = () => ["Nixon Antonio","Daxton Archibald","Kellan Blevins-Proctor","Noah Davies","Carter Devin","Graham Glasser","Nolan Guidinger","Kane Keenan","Cash Mackie","James Maier","Bennett Miller","Roen Peterson","Kian Ross","Grayson Russell","Nicolas Vargas","Rhett Wilson"];
 
 export default function App() {
   const [players, setPlayers] = useState(() => loadJSON("lax-players", defaultPlayers()));
