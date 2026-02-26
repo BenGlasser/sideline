@@ -25,7 +25,13 @@ export default function App() {
   const [editingName, setEditingName] = useState("");
   const [toast, setToast] = useState(null);
   const [lastAction, setLastAction] = useState(null);
+  const [wide, setWide] = useState(() => window.innerWidth > 768);
 
+  useEffect(() => {
+    const onResize = () => setWide(window.innerWidth > 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
   useEffect(() => { saveJSON("lax-players", players); }, [players]);
   useEffect(() => { saveJSON("lax-sessions", sessions); }, [sessions]);
   useEffect(() => { if (activeSession) saveJSON("lax-active", activeSession); else localStorage.removeItem("lax-active"); }, [activeSession]);
@@ -130,9 +136,11 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
+  const containerStyle = { ...styles.container, maxWidth: wide ? 960 : 480 };
+
   if (view === "home") {
     return (
-      <div style={styles.container}>
+      <div style={containerStyle}>
         <div style={styles.header}>
           <div style={styles.logoRow}>
             <span style={styles.logo}>🥍</span>
@@ -170,7 +178,7 @@ export default function App() {
   if (view === "tracking" && activeSession) {
     if (!selectedPlayer) {
       return (
-        <div style={styles.container}>
+        <div style={containerStyle}>
           <div style={styles.trackHeader}>
             <button style={styles.backBtn} onClick={() => setView("home")}>←</button>
             <div><h2 style={styles.trackTitle}>{activeSession.type}</h2><p style={styles.trackDate}>{new Date(activeSession.date).toLocaleDateString()}</p></div>
@@ -181,7 +189,7 @@ export default function App() {
             </div>
           </div>
           <p style={styles.instruction}>Tap a player to record</p>
-          <div style={styles.playerGrid}>
+          <div style={{ ...styles.playerGrid, gridTemplateColumns: wide ? "1fr 1fr 1fr 1fr" : "1fr 1fr" }}>
             {players.map((p) => {
               const total = getPlayerTotal(activeSession, p);
               return (<button key={p} style={styles.playerCard} onClick={() => setSelectedPlayer(p)}>
@@ -195,7 +203,7 @@ export default function App() {
       );
     }
     return (
-      <div style={styles.container}>
+      <div style={containerStyle}>
         <div style={styles.trackHeader}>
           <button style={styles.backBtn} onClick={() => setSelectedPlayer(null)}>←</button>
           <div>
@@ -204,7 +212,7 @@ export default function App() {
           </div>
           <button style={{ ...styles.endBtn, background: lastAction ? "#475569" : "#1e293b", opacity: lastAction ? 1 : 0.4 }} onClick={undoLast} disabled={!lastAction}>Undo</button>
         </div>
-        <div style={styles.categoryList}>
+        <div style={{ ...styles.categoryList, ...(wide ? { maxWidth: 600, margin: "0 auto" } : {}) }}>
           {CATEGORIES.map((group) => (
             <div key={group.group} style={styles.catGroup}>
               <p style={{ ...styles.catGroupLabel, color: group.color }}>{group.group}</p>
@@ -245,14 +253,14 @@ export default function App() {
     };
     const presentCount = players.filter((p) => (activeSession.marks[p]?.["Attendance"] || []).reduce((a, b) => a + b, 0) > 0).length;
     return (
-      <div style={styles.container}>
+      <div style={containerStyle}>
         <div style={styles.trackHeader}>
           <button style={styles.backBtn} onClick={() => { setSelectedPlayer(null); setView("tracking"); }}>←</button>
           <div><h2 style={styles.trackTitle}>Attendance</h2><p style={styles.trackDate}>{presentCount}/{players.length} present</p></div>
           <button style={styles.endBtn} onClick={() => { setSelectedPlayer(null); setView("tracking"); }}>Done</button>
         </div>
         <p style={styles.instruction}>Tap to toggle attendance</p>
-        <div style={styles.attendanceList}>
+        <div style={{ ...styles.attendanceList, ...(wide ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 } : {}) }}>
           {players.map((p) => {
             const isPresent = (activeSession.marks[p]?.["Attendance"] || []).reduce((a, b) => a + b, 0) > 0;
             return (
@@ -270,13 +278,13 @@ export default function App() {
 
   if (view === "review" && activeSession) {
     return (
-      <div style={styles.container}>
+      <div style={containerStyle}>
         <div style={styles.trackHeader}>
           <button style={styles.backBtn} onClick={() => { setSelectedPlayer(null); setView("tracking"); }}>←</button>
           <h2 style={styles.trackTitle}>Review & Notes</h2>
           <button style={styles.endBtn} onClick={endSession}>Save & End</button>
         </div>
-        <div style={styles.reviewList}>
+        <div style={{ ...styles.reviewList, ...(wide ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, alignItems: "start" } : {}) }}>
           {players.map((p) => {
             const total = getPlayerTotal(activeSession, p);
             const hasMark = Object.keys(activeSession.marks[p] || {}).length > 0;
@@ -304,7 +312,7 @@ export default function App() {
   if (view === "history") {
     if (detailSession) {
       return (
-        <div style={styles.container}>
+        <div style={containerStyle}>
           <div style={styles.trackHeader}>
             <button style={styles.backBtn} onClick={() => setDetailSession(null)}>←</button>
             <div><h2 style={styles.trackTitle}>{detailSession.type}</h2><p style={styles.trackDate}>{new Date(detailSession.date).toLocaleDateString()}</p></div>
@@ -313,7 +321,7 @@ export default function App() {
               <button style={{ ...styles.endBtn, background: "#1e3a5f" }} onClick={() => exportSessionCSV(detailSession)}>Export</button>
             </div>
           </div>
-          <div style={styles.reviewList}>
+          <div style={{ ...styles.reviewList, ...(wide ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, alignItems: "start" } : {}) }}>
             {players.map((p) => {
               const total = getPlayerTotal(detailSession, p);
               const hasMark = Object.keys(detailSession.marks[p] || {}).length > 0;
@@ -338,14 +346,14 @@ export default function App() {
       );
     }
     return (
-      <div style={styles.container}>
+      <div style={containerStyle}>
         <div style={styles.trackHeader}>
           <button style={styles.backBtn} onClick={() => setView("home")}>←</button>
           <h2 style={styles.trackTitle}>Session History</h2>
           <button style={{ ...styles.endBtn, background: sessions.length ? "#1e3a5f" : "#1e293b", opacity: sessions.length ? 1 : 0.4 }} onClick={exportAllCSV} disabled={!sessions.length}>Export All</button>
         </div>
         {sessions.length === 0 ? (<p style={styles.empty}>No sessions recorded yet.</p>) : (
-          <div style={styles.historyList}>
+          <div style={{ ...styles.historyList, ...(wide ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 } : {}) }}>
             {[...sessions].reverse().map((s) => {
               const activePlayers = players.filter((p) => Object.keys(s.marks[p] || {}).length > 0);
               return (<button key={s.id} style={styles.historyCard} onClick={() => setDetailSession(s)}>
@@ -364,13 +372,13 @@ export default function App() {
 
   if (view === "settings") {
     return (
-      <div style={styles.container}>
+      <div style={containerStyle}>
         <div style={styles.trackHeader}>
           <button style={styles.backBtn} onClick={() => setView("home")}>←</button>
           <h2 style={styles.trackTitle}>Roster</h2>
           <button style={styles.endBtn} onClick={() => setPlayers([...players, `Player ${players.length + 1}`])}>+ Add</button>
         </div>
-        <div style={styles.rosterList}>
+        <div style={{ ...styles.rosterList, ...(wide ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 } : {}) }}>
           {players.map((p, i) => (
             <div key={i} style={styles.rosterRow}>
               {editingPlayerIndex === i ? (
