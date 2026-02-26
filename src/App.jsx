@@ -137,11 +137,12 @@ export default function App() {
   };
 
   const containerStyle = { ...styles.container, maxWidth: wide ? 960 : 480 };
+  const fullWidthBar = wide ? { width: "100vw", marginLeft: "calc(-50vw + 50%)", paddingLeft: "calc(50vw - 50% + 16px)", paddingRight: "calc(50vw - 50% + 16px)", boxSizing: "border-box" } : {};
 
   if (view === "home") {
     return (
       <div style={containerStyle}>
-        <div style={styles.header}>
+        <div style={{ ...styles.header, ...fullWidthBar }}>
           <div style={styles.logoRow}>
             <span style={styles.logo}>🥍</span>
             <div>
@@ -179,7 +180,7 @@ export default function App() {
     if (!selectedPlayer) {
       return (
         <div style={containerStyle}>
-          <div style={styles.trackHeader}>
+          <div style={{ ...styles.trackHeader, ...fullWidthBar }}>
             <button style={styles.backBtn} onClick={() => setView("home")}>←</button>
             <div><h2 style={styles.trackTitle}>{activeSession.type}</h2><p style={styles.trackDate}>{new Date(activeSession.date).toLocaleDateString()}</p></div>
             <div style={styles.trackActions}>
@@ -204,7 +205,7 @@ export default function App() {
     }
     return (
       <div style={containerStyle}>
-        <div style={styles.trackHeader}>
+        <div style={{ ...styles.trackHeader, ...fullWidthBar }}>
           <button style={styles.backBtn} onClick={() => setSelectedPlayer(null)}>←</button>
           <div>
             <h2 style={styles.trackTitle}>{selectedPlayer}</h2>
@@ -254,7 +255,7 @@ export default function App() {
     const presentCount = players.filter((p) => (activeSession.marks[p]?.["Attendance"] || []).reduce((a, b) => a + b, 0) > 0).length;
     return (
       <div style={containerStyle}>
-        <div style={styles.trackHeader}>
+        <div style={{ ...styles.trackHeader, ...fullWidthBar }}>
           <button style={styles.backBtn} onClick={() => { setSelectedPlayer(null); setView("tracking"); }}>←</button>
           <div><h2 style={styles.trackTitle}>Attendance</h2><p style={styles.trackDate}>{presentCount}/{players.length} present</p></div>
           <button style={styles.endBtn} onClick={() => { setSelectedPlayer(null); setView("tracking"); }}>Done</button>
@@ -279,7 +280,7 @@ export default function App() {
   if (view === "review" && activeSession) {
     return (
       <div style={containerStyle}>
-        <div style={styles.trackHeader}>
+        <div style={{ ...styles.trackHeader, ...fullWidthBar }}>
           <button style={styles.backBtn} onClick={() => { setSelectedPlayer(null); setView("tracking"); }}>←</button>
           <h2 style={styles.trackTitle}>Review & Notes</h2>
           <button style={styles.endBtn} onClick={endSession}>Save & End</button>
@@ -313,7 +314,7 @@ export default function App() {
     if (detailSession) {
       return (
         <div style={containerStyle}>
-          <div style={styles.trackHeader}>
+          <div style={{ ...styles.trackHeader, ...fullWidthBar }}>
             <button style={styles.backBtn} onClick={() => setDetailSession(null)}>←</button>
             <div><h2 style={styles.trackTitle}>{detailSession.type}</h2><p style={styles.trackDate}>{new Date(detailSession.date).toLocaleDateString()}</p></div>
             <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
@@ -347,7 +348,7 @@ export default function App() {
     }
     return (
       <div style={containerStyle}>
-        <div style={styles.trackHeader}>
+        <div style={{ ...styles.trackHeader, ...fullWidthBar }}>
           <button style={styles.backBtn} onClick={() => setView("home")}>←</button>
           <h2 style={styles.trackTitle}>Session History</h2>
           <button style={{ ...styles.endBtn, background: sessions.length ? "#1e3a5f" : "#1e293b", opacity: sessions.length ? 1 : 0.4 }} onClick={exportAllCSV} disabled={!sessions.length}>Export All</button>
@@ -373,7 +374,7 @@ export default function App() {
   if (view === "settings") {
     return (
       <div style={containerStyle}>
-        <div style={styles.trackHeader}>
+        <div style={{ ...styles.trackHeader, ...fullWidthBar }}>
           <button style={styles.backBtn} onClick={() => setView("home")}>←</button>
           <h2 style={styles.trackTitle}>Roster</h2>
           <button style={styles.endBtn} onClick={() => setPlayers([...players, `Player ${players.length + 1}`])}>+ Add</button>
