@@ -137,7 +137,7 @@ export default function App() {
           <div style={styles.logoRow}>
             <span style={styles.logo}>🥍</span>
             <div>
-              <h1 style={styles.title}>SIDELINE</h1>
+              <h1 style={styles.title}>LAXTIME</h1>
               <p style={styles.subtitle}>Player Performance Tracker</p>
             </div>
           </div>
@@ -175,6 +175,7 @@ export default function App() {
             <button style={styles.backBtn} onClick={() => setView("home")}>←</button>
             <div><h2 style={styles.trackTitle}>{activeSession.type}</h2><p style={styles.trackDate}>{new Date(activeSession.date).toLocaleDateString()}</p></div>
             <div style={styles.trackActions}>
+              <button style={styles.reviewBtn} onClick={() => setView("attendance")}>📋</button>
               <button style={styles.reviewBtn} onClick={() => setView("review")}>📝</button>
               <button style={styles.endBtn} onClick={endSession}>Save</button>
             </div>
@@ -222,6 +223,45 @@ export default function App() {
               })}
             </div>
           ))}
+        </div>
+        {toast && <div style={{ ...styles.toast, background: toast.color }}>{toast.msg}</div>}
+      </div>
+    );
+  }
+
+  if (view === "attendance" && activeSession) {
+    const toggleAttendance = (player) => {
+      const updated = { ...activeSession };
+      if (!updated.marks[player]) updated.marks[player] = {};
+      const current = (updated.marks[player]["Attendance"] || []).reduce((a, b) => a + b, 0);
+      if (current > 0) {
+        updated.marks[player]["Attendance"] = [];
+        showToast(`${player}: absent`, "#94a3b8");
+      } else {
+        updated.marks[player]["Attendance"] = [1];
+        showToast(`${player}: present`, "#22c55e");
+      }
+      setActiveSession(updated);
+    };
+    const presentCount = players.filter((p) => (activeSession.marks[p]?.["Attendance"] || []).reduce((a, b) => a + b, 0) > 0).length;
+    return (
+      <div style={styles.container}>
+        <div style={styles.trackHeader}>
+          <button style={styles.backBtn} onClick={() => { setSelectedPlayer(null); setView("tracking"); }}>←</button>
+          <div><h2 style={styles.trackTitle}>Attendance</h2><p style={styles.trackDate}>{presentCount}/{players.length} present</p></div>
+          <button style={styles.endBtn} onClick={() => { setSelectedPlayer(null); setView("tracking"); }}>Done</button>
+        </div>
+        <p style={styles.instruction}>Tap to toggle attendance</p>
+        <div style={styles.attendanceList}>
+          {players.map((p) => {
+            const isPresent = (activeSession.marks[p]?.["Attendance"] || []).reduce((a, b) => a + b, 0) > 0;
+            return (
+              <button key={p} style={{ ...styles.attendanceRow, borderColor: isPresent ? "#22c55e" : "#334155", background: isPresent ? "#14532d22" : "#1e293b" }} onClick={() => toggleAttendance(p)}>
+                <span style={styles.attendanceName}>{p}</span>
+                <span style={{ ...styles.attendanceCheck, color: isPresent ? "#22c55e" : "#334155" }}>{isPresent ? "✓" : "○"}</span>
+              </button>
+            );
+          })}
         </div>
         {toast && <div style={{ ...styles.toast, background: toast.color }}>{toast.msg}</div>}
       </div>
@@ -417,4 +457,8 @@ const styles = {
   rosterInput: { flex: 1, background: "#0f172a", border: "1px solid #475569", borderRadius: 8, padding: "8px 12px", color: "#e2e8f0", fontSize: 15, fontFamily: "inherit", outline: "none" },
   saveNameBtn: { background: "#14532d", border: "none", borderRadius: 8, padding: "8px 14px", color: "#86efac", fontSize: 16, fontWeight: 700, cursor: "pointer" },
   toast: { position: "fixed", bottom: 32, left: "50%", transform: "translateX(-50%)", padding: "10px 20px", borderRadius: 10, color: "#fff", fontSize: 14, fontWeight: 700, zIndex: 100, pointerEvents: "none", boxShadow: "0 4px 20px rgba(0,0,0,0.4)" },
+  attendanceList: { padding: "8px 16px 24px" },
+  attendanceRow: { width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", border: "1px solid", borderRadius: 12, padding: "16px 18px", marginBottom: 8, cursor: "pointer", WebkitTapHighlightColor: "transparent" },
+  attendanceName: { fontSize: 15, fontWeight: 600, color: "#e2e8f0" },
+  attendanceCheck: { fontSize: 22, fontWeight: 700 },
 };

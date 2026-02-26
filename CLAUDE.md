@@ -9,13 +9,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run lint` — Run ESLint
 - `npm run preview` — Preview production build locally
 
-No test framework is configured. Both `package-lock.json` and `yarn.lock` exist; use npm.
+No test framework is configured. Both `package-lock.json` and `yarn.lock` exist; prefer npm.
 
 ## Architecture
 
 Single-page React 19 app built with Vite, deployed on Vercel. Tracks lacrosse player performance during practices and games.
 
-**The entire app lives in `src/App.jsx` (~420 lines)** — a single monolithic component using `useState` for all state and localStorage for persistence. There is no router, no external state management, and no component decomposition.
+**The entire app lives in `src/App.jsx` (~420 lines)** — a single monolithic component using `useState` for all state and localStorage for persistence. There is no router, no external state management, and no component decomposition. Mobile-first layout (max-width 480px, touch-optimized).
 
 ### Data Model
 
@@ -23,6 +23,8 @@ Single-page React 19 app built with Vite, deployed on Vercel. Tracks lacrosse pl
 - **sessions** — array of completed session objects (persisted to localStorage)
 - **activeSession** — current in-progress tracking session with `{ id, type, date, marks, notes }`
 - **marks** — nested object: `marks[playerName][category] = [+1/-1 values]`
+
+localStorage keys: `lax-players`, `lax-sessions`, `lax-active`
 
 ### Views (controlled by `view` state string)
 
@@ -34,9 +36,16 @@ Single-page React 19 app built with Vite, deployed on Vercel. Tracks lacrosse pl
 - Presence: Game Awareness, Practice Focus
 - Sportsmanship: Humility, Gracious in Defeat, Bar Raiser
 
+### Key Features
+
+- CSV export (single session or all sessions) via Blob/download
+- Undo last mark action (single-level)
+- Per-player notes on each session
+- Toast notifications for feedback
+
 ### Styling
 
-All styles are inline JavaScript objects defined within App.jsx. No CSS files or CSS-in-JS library.
+All styles are inline JavaScript objects in the `styles` object at the bottom of App.jsx. No CSS files or CSS-in-JS library. `main.jsx` sets global body styles (margin/background) directly on `document.body`.
 
 ## ESLint
 
